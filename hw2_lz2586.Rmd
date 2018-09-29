@@ -1,0 +1,20 @@
+---
+title: "p8105_hw2"
+author: "Lyuou Zhang"
+date: "9/29/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r cars}
+
+
+```
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
