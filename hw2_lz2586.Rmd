@@ -6,7 +6,6 @@ output:
   github_document:
     toc: true
 ---
-
 ```{r setup, include=FALSE}
 library(tidyverse)
 options(tibble.print_min = 5)
@@ -14,8 +13,10 @@ library(readxl)
 library(p8105.datasets)
 ```
 
-```{r problem_1}
+## Problem 1
 
+```{r problem_1}
+# Import transit data and data cleaning
 transit <- read_csv(file = './data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv') %>% 
   janitor::clean_names() %>% 
   select(line, station_name, lat = station_latitude, long = station_longitude, route1:entry, vending, ada) %>% 
@@ -50,27 +51,32 @@ filter(transit_tidy_d, train == 'A' & ada == TRUE)
 # 60 distinct stations serve the A train, and 17 of them are ADA compliant
 ```
 
-I have imported the dataset, cleaned the names, convert variables with "yes" or "no" to logical variables, and selected the variables that I need. I also converted the routes that were tought to be numeric by R to character. Now the dataset contains line, station name, the coordinates of each station, entrance type, entry, vending, ada compliance and train routes. Before I tidy the dataset, the dimension is **1868(row)*19(column)**. These data is not tidy.  
+I have imported the dataset, cleaned the names, convert variables with "yes" or "no" to logical variables, and selected the variables that I need. I also converted the routes that were tought to be numeric by R to character. Now the dataset contains line, station name, the coordinates of each station, entrance type, entry, vending, ada compliance and train routes. Before I tidy the dataset, the dimension is 1868(row)*19(column). These data is not tidy.  
   
-Answer for the questions:
-There are **465** distinct stations.  
-**84** of these stations are ADA compliant.  
-**3.69** of stations entrances/exits without vending allow entrance.  
-**60** distinct stations serve the A train. **17** of them are ADA compliant.  
+Answer for the questions:  
+* There are **465** distinct stations.  
+* **84** of these stations are ADA compliant.  
+* **3.69** of stations entrances/exits without vending allow entrance.  
+* **60** distinct stations serve the A train. **17** of them are ADA compliant.  
+
+## Problem 2
 
 ```{r problem_2}
+# Import the Trash Wheel sheet data and data cleaning
 trashwheel <- read_excel('./data/HealthyHarborWaterWheelTotals2017-9-26.xlsx', sheet = 'Mr. Trash Wheel', range = 'A2:N258')
 trashwheel <- janitor::clean_names(trashwheel) 
 trashwheel <- filter(trashwheel, !is.na(dumpster))
 trashwheel <- mutate(trashwheel, spball_round = round(sports_balls, digits = 0))
 trashwheel$spball_round <- as.integer(trashwheel$spball_round)
 
-# Precipitation
+# Import and clean precipitation data
+# precipitation 2016
 precip_16 <- read_excel('./data/HealthyHarborWaterWheelTotals2017-9-26.xlsx', sheet = '2016 Precipitation', range = 'A2:B14')
 precip_16 <- janitor::clean_names(precip_16)
 precip_16 <- mutate(precip_16, year = '2016')
 precip_16 <- rename(precip_16, precip = 'total')
 
+# precipitation 2017
 precip_17 <- read_excel('./data/HealthyHarborWaterWheelTotals2017-9-26.xlsx', sheet = '2017 Precipitation', range = 'A2:B14')
 precip_17 %>% 
   janitor::clean_names() %>% 
@@ -83,9 +89,11 @@ precip_j <- bind_rows(precip_16, precip_17)
 precip_j$month <- as.character(month.name[precip_j$month])
 sum(precip_17$precip)
 
+# I made a subset of data in year 2016. And calculated the median using both sports balls and the rounded sports balls.
 dump_16 <- filter(trashwheel, year == '2016')
 median(dump_16$sports_balls)
 median(dump_16$spball_round)
+# The results are both 26.
 
 ```
 
@@ -93,7 +101,11 @@ After cleaning, Mr. Trash Wheel dataset has 215 observations, and the joined pre
   
 The total precipitation in 2017 is `r sum(precip_17$precip)`. The median number of sports balls in dumpster in 2016 is `r median(dump_16$spball_round)`.
 
+## Problem 3
+
 ```{r BRFSS}
+# I installed the packages, and brfss_smart2010 is already built in. 
+# Data cleaning
 head(brfss_smart2010)
 brfss_tidy <- janitor::clean_names(brfss_smart2010)
 brfss_tidy <- brfss_tidy %>% 
@@ -105,16 +117,25 @@ brfss_tidy <- brfss_tidy %>%
   janitor::clean_names() %>% 
   mutate(excellent_or_very_good = excellent + very_good)
 
+# Find distinct locations and states 
 distinct(brfss_tidy, county)
 distinct(brfss_tidy, state)
-ggplot(brfss_tidy, aes(x = state)) + geom_bar(stat = 'count')
 
+# Use a bar chart to find out the state which is represented the most
+ggplot(brfss_tidy, aes(x = state)) + geom_bar(stat = 'count')
+ggsave('count_by_state.jpeg')
+
+# Subset the dataset to find conditional median
 brfss_12 <- filter(brfss_tidy, year == '2002')
 median(brfss_12$excellent, na.rm = T)
+
+# plots
 ggplot(brfss_12, aes(x = excellent)) + geom_histogram(binwidth = 1)
+ggsave('hist_excellent.jpeg')
 brfss_nyq <- filter(brfss_tidy, county == 'NY - New York County' | county == 'NY - Queens County')
 ggplot(brfss_nyq, aes(x = year, y = excellent, color = county)) +
   geom_point()
+ggsave('point_nyq.jpeg')
 
 ```
 
