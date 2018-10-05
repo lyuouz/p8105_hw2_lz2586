@@ -63,22 +63,23 @@ Answer for the questions:
 
 ```{r problem_2}
 # Import the Trash Wheel sheet data and data cleaning
-trashwheel <- read_excel('./data/HealthyHarborWaterWheelTotals2017-9-26.xlsx', sheet = 'Mr. Trash Wheel', range = 'A2:N258')
-trashwheel <- janitor::clean_names(trashwheel) 
-trashwheel <- filter(trashwheel, !is.na(dumpster))
-trashwheel <- mutate(trashwheel, spball_round = round(sports_balls, digits = 0))
+trashwheel <- read_excel('./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx', sheet = 'Mr. Trash Wheel', range = 'A2:N338') %>% 
+  janitor::clean_names() %>% 
+  filter(!is.na(dumpster)) %>% 
+  mutate(spball_round = round(sports_balls, digits = 0))
+# Convert the rounded sports ball variable to integer
 trashwheel$spball_round <- as.integer(trashwheel$spball_round)
 
 # Import and clean precipitation data
 # precipitation 2016
-precip_16 <- read_excel('./data/HealthyHarborWaterWheelTotals2017-9-26.xlsx', sheet = '2016 Precipitation', range = 'A2:B14')
-precip_16 <- janitor::clean_names(precip_16)
-precip_16 <- mutate(precip_16, year = '2016')
-precip_16 <- rename(precip_16, precip = 'total')
+precip_16 <- read_excel('./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx', sheet = '2016 Precipitation', range = 'A2:B14') %>% 
+  janitor::clean_names() %>% 
+  mutate(year = '2016') %>% 
+  rename(precip = 'total')
+
 
 # precipitation 2017
-precip_17 <- read_excel('./data/HealthyHarborWaterWheelTotals2017-9-26.xlsx', sheet = '2017 Precipitation', range = 'A2:B14')
-precip_17 %>% 
+precip_17 <- read_excel('./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx', sheet = '2017 Precipitation', range = 'A2:B14') %>% 
   janitor::clean_names() %>% 
   mutate(year = '2017') %>% 
   rename(precip = 'total') %>% 
@@ -125,10 +126,10 @@ distinct(brfss_tidy, state)
 ggplot(brfss_tidy, aes(x = state)) + geom_bar(stat = 'count')
 ggsave('count_by_state.jpeg')
 
-# Subset the dataset the median of excellent responses in 2002 
+# Use group_by to find the median of excellent responses in 2002 
 brfss_tidy %>% 
   group_by(year) %>% 
-  summarize(median_ex = median(excellent, na.rm = T)) %>% 
+  summarize(median_exc = median(excellent, na.rm = T))
 
 # The histogram of "excellent" response values in 2002 
 # filter the data by year = 2002 and then use ggplot to make the histogram
@@ -147,4 +148,4 @@ ggsave('point_nyq.jpeg')
 ```
 
 * I used distinct() to find unique county or state. There are 404 unique locations in the dataset. Because there are 51 unique values in "state", every state is represented (including Washington D.C.). I also made a bar chart to see the distribution of observations in each state. New Jersey is observed the most.  
-* I used filter() to make a subset of BRFSS data which only contains data in 2002. The median of the 'excellent' respsonse value is `r median(brfss_12$excellent, na.rm = T)`. Note that I removed two missing values.  
+* I used filter() to make a subset of BRFSS data which only contains data in 2002. The median of the 'excellent' respsonse value is 23.6 (there are two missing values that are removed).
