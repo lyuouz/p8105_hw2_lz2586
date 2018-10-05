@@ -156,7 +156,6 @@ brfss_tidy %>%
   ggplot(aes(x = year, y = excellent, color = county)) + geom_point()
 ggsave('point_nyq.jpeg')
 
-
 ```
 
 * I used distinct() to find unique county or state. There are **404** unique locations in the dataset. Because there are **51** unique values in "state", every state is represented (including Washington D.C.). I made a bar chart to see the distribution of observations in each state. New Jersey is observed the most. I also used group_by() then count() to see the exact number of observations of New Jersey. It's **146**.  
