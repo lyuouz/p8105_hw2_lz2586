@@ -125,16 +125,23 @@ distinct(brfss_tidy, state)
 ggplot(brfss_tidy, aes(x = state)) + geom_bar(stat = 'count')
 ggsave('count_by_state.jpeg')
 
-# Subset the dataset to find conditional median
-brfss_12 <- filter(brfss_tidy, year == '2002')
-median(brfss_12$excellent, na.rm = T)
+# Subset the dataset the median of excellent responses in 2002 
+brfss_tidy %>% 
+  group_by(year) %>% 
+  summarize(median_ex = median(excellent, na.rm = T)) %>% 
 
-# plots
-ggplot(brfss_12, aes(x = excellent)) + geom_histogram(binwidth = 1)
+# The histogram of "excellent" response values in 2002 
+# filter the data by year = 2002 and then use ggplot to make the histogram
+brfss_tidy %>% 
+  filter(year == '2002') %>% 
+  ggplot(aes(x = excellent)) + geom_histogram()
 ggsave('hist_excellent.jpeg')
-brfss_nyq <- filter(brfss_tidy, county == 'NY - New York County' | county == 'NY - Queens County')
-ggplot(brfss_nyq, aes(x = year, y = excellent, color = county)) +
-  geom_point()
+
+# Scatterplot showing the proportion of 'excellent' response valus in New York County and Queens County 
+# filter the data by county and use ggplot 
+brfss_tidy %>% 
+  filter(county == 'NY - New York County' | county == 'NY - Queens County') %>% 
+  ggplot(aes(x = year, y = excellent, color = county)) + geom_point()
 ggsave('point_nyq.jpeg')
 
 ```
