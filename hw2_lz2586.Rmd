@@ -38,8 +38,9 @@ summary(d_transit)
 # There are 465 distinct stations, and 84 of them are ADA compliant.
 # proportion of station antrances/exits without vending allow entrance
 filter(transit, vending == FALSE & entry == TRUE)
-# 69 of them are without vending but allow entrance
-69/1868
+filter(transit, vending == FALSE)
+# 69 of them are without vending but allow entrance. There are 183 station entrances/exits without vending.
+69/183
 
 # tidying data cont.
 transit_tidy <- gather(transit, key = route, value = train, route1:route11) 
@@ -56,8 +57,11 @@ I have imported the dataset, cleaned the names, convert variables with "yes" or 
 Answer for the questions:  
 * There are **465** distinct stations.  
 * **84** of these stations are ADA compliant.  
-* **3.69** of stations entrances/exits without vending allow entrance.  
-* **60** distinct stations serve the A train. **17** of them are ADA compliant.  
+* **37.7** of stations entrances/exits without vending allow entrance.  
+  
+After I tidy the data so that route number and route name are distinct variables:  
+* **60** distinct stations serve the A train.  
+* Of the stations that serve the A train, **17** of them are ADA compliant.  
 
 ## Problem 2
 
@@ -98,15 +102,17 @@ median(dump_16$spball_round)
 
 ```
 
-After cleaning, Mr. Trash Wheel dataset has 215 observations, and the joined precipitation dataset has 20 observations.  
-  
-The total precipitation in 2017 is `r sum(precip_17$precip)`. The median number of sports balls in dumpster in 2016 is `r median(dump_16$spball_round)`.
+After cleaning, Mr. Trash Wheel dataset has **`r nrow(trashwheel)`** observations. It has the dumpster number, the date, month and year of the observation, the amount of trash measured by weight and by volume, and the amount of trash of each category (plastic bottles, cigarette butts, glass bottles, etc.)  
+
+I also joined the precipitation data in 2016 and 2017 in a dataset called "precip_j". There are **`r nrow(precip_j)`** observations. This dataset has the precipitation data every month from 2016 to 2017.  
+
+The total precipitation in 2017 is **`r sum(precip_17$precip)`**. The median number of sports balls in dumpster in 2016 is **`r median(dump_16$spball_round)`**.
 
 ## Problem 3
 
 ```{r BRFSS}
 # I installed the packages, and brfss_smart2010 is already built in. 
-# Data cleaning
+# Data cleaning. I rename the variables, filter the observations by topic (overall health), select the variables, tidy the data and create a variable that sums up "excellent" and "good" responses. 
 head(brfss_smart2010)
 brfss_tidy <- janitor::clean_names(brfss_smart2010)
 brfss_tidy <- brfss_tidy %>% 
@@ -118,13 +124,18 @@ brfss_tidy <- brfss_tidy %>%
   janitor::clean_names() %>% 
   mutate(excellent_or_very_good = excellent + very_good)
 
-# Find distinct locations and states 
+# Use distinct() to find distinct locations and states 
 distinct(brfss_tidy, county)
 distinct(brfss_tidy, state)
 
 # Use a bar chart to find out the state which is represented the most
 ggplot(brfss_tidy, aes(x = state)) + geom_bar(stat = 'count')
 ggsave('count_by_state.jpeg')
+# I'm also able to find out the exact count for each state.
+brfss_tidy %>% 
+  group_by(state) %>% 
+  count()
+# New Jersey has the most observations (146).
 
 # Use group_by to find the median of excellent responses in 2002 
 brfss_tidy %>% 
@@ -145,7 +156,9 @@ brfss_tidy %>%
   ggplot(aes(x = year, y = excellent, color = county)) + geom_point()
 ggsave('point_nyq.jpeg')
 
+
 ```
 
-* I used distinct() to find unique county or state. There are 404 unique locations in the dataset. Because there are 51 unique values in "state", every state is represented (including Washington D.C.). I also made a bar chart to see the distribution of observations in each state. New Jersey is observed the most.  
-* I used filter() to make a subset of BRFSS data which only contains data in 2002. The median of the 'excellent' respsonse value is 23.6 (there are two missing values that are removed).
+* I used distinct() to find unique county or state. There are **404** unique locations in the dataset. Because there are **51** unique values in "state", every state is represented (including Washington D.C.). I made a bar chart to see the distribution of observations in each state. New Jersey is observed the most. I also used group_by() then count() to see the exact number of observations of New Jersey. It's **146**.  
+  
+* I used filter() to make a subset of BRFSS data which only contains data in 2002. The median of the 'excellent' respsonse value is **23.6** (there are two missing values that are removed).
